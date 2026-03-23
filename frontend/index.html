@@ -1,161 +1,356 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FraudGuard Dashboard</title>
+    <title>Fraud Detection System</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        darkbg: '#0d1117',
-                        cardbg: '#161b22',
-                        bordercolor: '#30363d',
-                        accent: '#58a6ff',
-                        danger: '#f85149',
-                        success: '#3fb950'
+                        pagebg: '#FCECD5',
+                        cardbg: '#FFFFFF',
+                        primary: '#875A19',
+                        primarylight: '#F3D299',
+                        secondary: '#6C6256',
+                        tertiary: '#4B6344',
+                        danger: '#A63D32',
+                        textmain: '#2C2621',
+                        textsub: '#615A53',
+                        bordercol: '#DFD8D0'
                     }
                 }
             }
         }
     </script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0d1117; color: #c9d1d9; }
-        .spinner { border-top-color: #58a6ff; animation: spinner 1.5s linear infinite; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #FCECD5;
+            color: #2C2621;
+        }
+
+        .spinner {
+            border-top-color: #875A19;
+            animation: spinner 1s linear infinite;
+        }
+
+        @keyframes spinner {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
         /* Scrollbar styling */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #0d1117; }
-        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #58a6ff; }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #FCECD5;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #DFD8D0;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #875A19;
+        }
     </style>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        Chart.defaults.color = '#c9d1d9';
-        Chart.defaults.font.family = 'Inter';
+        Chart.defaults.color = '#615A53';
+        Chart.defaults.font.family = 'Outfit';
     </script>
 </head>
-<body class="min-h-screen p-4 md:p-8">
 
-    <!-- Header -->
-    <header class="flex flex-col md:flex-row justify-between items-center bg-cardbg p-4 rounded-lg border border-bordercolor shadow-sm mb-6">
-        <div>
-            <h1 class="text-2xl font-bold text-accent">FraudGuard</h1>
-            <p class="text-sm text-gray-400">SIH Internal Hackathon 2026</p>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+
+    <!-- Navigation Bar -->
+    <nav class="w-full max-w-7xl flex flex-row justify-between items-center py-2 mb-10 md:mb-16 px-4 md:px-0">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="location.reload()">
+            <div class="w-10 h-10 rounded-xl bg-primarylight text-primary flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+            </div>
+            <span class="text-2xl font-extrabold text-primary tracking-tight">FraudGuard</span>
         </div>
-        <div class="mt-4 md:mt-0 flex gap-4 items-center">
-            <input type="file" id="fileInput" accept=".csv" class="hidden" onchange="analyzeData()">
-            <button onclick="document.getElementById('fileInput').click()" class="bg-bordercolor hover:bg-gray-700 text-white px-4 py-2 rounded transition font-medium">
-                Upload CSV
-            </button>
-            <button onclick="analyzeData()" class="bg-accent hover:bg-blue-600 text-white px-4 py-2 rounded transition font-medium">
-                Analyze Sample
-            </button>
+        <div class="hidden md:flex gap-10 items-center">
+            <a href="#" onclick="location.reload()" class="text-primary font-bold hover:text-primary transition border-b-2 border-primary pb-1">Home</a>
+            <a href="#" class="text-textsub font-semibold hover:text-primary transition border-b-2 border-transparent hover:border-primary pb-1">About Project</a>
+            <a href="#" class="text-textsub font-semibold hover:text-primary transition border-b-2 border-transparent hover:border-primary pb-1">Contact</a>
         </div>
-    </header>
+        <button class="md:hidden text-primary focus:outline-none">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </nav>
+
+    <!-- Landing View -->
+    <div id="landingView" class="w-full max-w-6xl mt-10 md:mt-20 flex flex-col items-center animate-fade-in">
+        <div class="text-center mb-16">
+            <h6 class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-primary mb-6 tracking-tight">Yadavrao
+                Tasgaonkar College Of Engineering</h6>
+            <h3 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-primary mb-6 tracking-tight">Fraud Detection
+                System</h3>
+            <p class="text-lg md:text-xl text-textsub max-w-3xl mx-auto leading-relaxed">Secure your financial
+                operations. Upload transaction datasets to leverage advanced machine learning models and detect
+                anomalies, account takeovers, and high-velocity drain attempts instantly.</p>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20 w-full px-4">
+            <div
+                class="bg-cardbg p-8 rounded-3xl shadow-sm border border-bordercol text-center hover:shadow-lg transition duration-300 transform hover:-translate-y-1">
+                <div
+                    class="w-16 h-16 rounded-2xl bg-[#FDF4E3] text-primary flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-textmain font-bold text-xl mb-3">Random Forest ML</h3>
+                <p class="text-textsub text-sm leading-relaxed">Powered by scikit-learn, assigning highly accurate fraud
+                    probability scores via pseudo-labeling criteria.</p>
+            </div>
+            <div
+                class="bg-cardbg p-8 rounded-3xl shadow-sm border border-bordercol text-center hover:shadow-lg transition duration-300 transform hover:-translate-y-1">
+                <div
+                    class="w-16 h-16 rounded-2xl bg-[#EAF0E8] text-tertiary flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-textmain font-bold text-xl mb-3">Behavioral Cleansing</h3>
+                <p class="text-textsub text-sm leading-relaxed">Automatically sanitizes missing IP networks, merges
+                    temporal date formats, and deduplicates transaction IDs.</p>
+            </div>
+            <div
+                class="bg-cardbg p-8 rounded-3xl shadow-sm border border-bordercol text-center hover:shadow-lg transition duration-300 transform hover:-translate-y-1">
+                <div
+                    class="w-16 h-16 rounded-2xl bg-[#EBE8E5] text-secondary flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                </div>
+                <h3 class="text-textmain font-bold text-xl mb-3">Detailed Analytics</h3>
+                <p class="text-textsub text-sm leading-relaxed">Review geographical location density, hourly fraud
+                    spikes, and deep category charts in real time.</p>
+            </div>
+        </div>
+
+        <!-- Upload Dropzone -->
+        <div
+            class="w-full max-w-3xl bg-cardbg p-10 md:p-14 rounded-3xl shadow-md border border-bordercol text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-primarylight to-primary">
+            </div>
+            <h2 class="text-3xl font-extrabold text-textmain mb-3">Start Analysis</h2>
+            <p class="text-textsub mb-8 text-lg">Upload your CSV transaction dataset to begin.</p>
+
+            <label for="fileInput"
+                class="relative border-2 border-dashed border-primary bg-[#FFFCF8] rounded-2xl p-16 hover:bg-[#FDF4E3] transition-colors cursor-pointer flex flex-col items-center justify-center group">
+                <input type="file" id="fileInput" accept=".csv" class="hidden" onchange="analyzeData()">
+                <div
+                    class="w-20 h-20 rounded-full bg-primarylight bg-opacity-30 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
+                        </path>
+                    </svg>
+                </div>
+                <span class="text-primary font-bold text-xl mb-2">Click to select CSV</span>
+                <p class="text-sm text-textsub">Processing is handled entirely in memory</p>
+            </label>
+        </div>
+    </div> <!-- End Landing View -->
+
 
     <!-- Overlay Spinner -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-darkbg bg-opacity-80 z-50 hidden flex-col justify-center items-center">
-        <div class="w-16 h-16 border-4 border-accent spinner rounded-full mb-4"></div>
-        <h2 id="loadingText" class="text-xl font-semibold text-accent animate-pulse">Analyzing transactions...</h2>
+    <div id="loadingOverlay"
+        class="fixed inset-0 bg-pagebg bg-opacity-90 z-50 hidden flex-col justify-center items-center backdrop-blur-sm">
+        <div class="w-24 h-24 border-4 border-primary border-t-transparent spinner rounded-full mb-8 relative"></div>
+        <h2 id="loadingText" class="text-3xl font-bold text-primary animate-pulse tracking-wide">Initializing engine...
+        </h2>
     </div>
 
     <!-- Error Message -->
-    <div id="errorBox" class="hidden bg-danger border border-danger bg-opacity-20 text-danger p-4 rounded-lg mb-6">
-        <strong>Error:</strong> <span id="errorMsg"></span>
+    <div id="errorBox"
+        class="hidden fixed top-8 left-1/2 transform -translate-x-1/2 bg-danger text-white px-6 py-4 rounded-xl shadow-xl z-50 flex items-center gap-4">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span><strong class="font-bold">Error:</strong> <span id="errorMsg"></span></span>
+        <button onclick="document.getElementById('errorBox').classList.add('hidden')"
+            class="ml-4 hover:text-gray-200 focus:outline-none text-xl">✕</button>
     </div>
 
-    <div id="dashboardContent" class="hidden flex-col gap-6">
+    <!-- Dashboard Content -->
+    <div id="dashboardContent" class="hidden w-full max-w-7xl flex-col gap-8 pb-10">
+        <!-- Header -->
+        <div
+            class="flex flex-col md:flex-row justify-between items-center bg-cardbg p-6 md:p-8 rounded-3xl border border-bordercol shadow-sm">
+            <div class="flex items-center gap-4 mb-4 md:mb-0">
+                <div class="w-12 h-12 rounded-full bg-primarylight text-primary flex items-center justify-center">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                        </path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-textmain">Fraud Detection System</h1>
+                    <p class="text-sm text-tertiary font-medium">Analysis Complete & Verified</p>
+                </div>
+            </div>
+            <button onclick="resetDashboard()"
+                class="bg-white border-2 border-bordercol hover:border-primary hover:text-primary text-textsub px-6 py-2.5 rounded-xl transition font-semibold shadow-sm">
+                Start Over
+            </button>
+        </div>
+
         <!-- KPIs -->
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor text-center hover:border-accent transition">
-                <div class="text-sm text-gray-400">Total Txns</div>
-                <div class="text-2xl font-bold" id="kpiTotal">0</div>
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-6">
+            <div
+                class="bg-cardbg p-6 rounded-3xl border border-bordercol flex flex-col justify-center items-center text-center shadow-sm">
+                <div class="text-sm text-textsub font-semibold uppercase tracking-wider mb-2">Total Transactions</div>
+                <div class="text-4xl font-extrabold text-textmain" id="kpiTotal">0</div>
             </div>
-            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor text-center hover:border-danger transition">
-                <div class="text-sm text-gray-400">Fraud Detected</div>
-                <div class="text-2xl font-bold text-danger" id="kpiFraud">0</div>
+            <div
+                class="bg-[#FCF1F0] p-6 rounded-3xl border border-[#D9A19D] flex flex-col justify-center items-center text-center shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 w-full h-1 bg-danger"></div>
+                <div class="text-sm text-danger font-semibold uppercase tracking-wider mb-2">Fraud Detected</div>
+                <div class="text-4xl font-extrabold text-danger" id="kpiFraud">0</div>
             </div>
-            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor text-center hover:border-danger transition">
-                <div class="text-sm text-gray-400">Fraud Rate</div>
-                <div class="text-2xl font-bold text-danger" id="kpiRate">0%</div>
+            <div
+                class="bg-[#FCF1F0] p-6 rounded-3xl border border-[#D9A19D] flex flex-col justify-center items-center text-center shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 w-full h-1 bg-danger"></div>
+                <div class="text-sm text-danger font-semibold uppercase tracking-wider mb-2">Fraud Rate</div>
+                <div class="text-4xl font-extrabold text-danger" id="kpiRate">0%</div>
             </div>
-            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor text-center hover:border-accent transition">
-                <div class="text-sm text-gray-400">F1 Score</div>
-                <div class="text-2xl font-bold text-accent" id="kpiF1">0</div>
+            <div
+                class="bg-cardbg p-6 rounded-3xl border border-bordercol flex flex-col justify-center items-center text-center shadow-sm">
+                <div class="text-sm text-textsub font-semibold uppercase tracking-wider mb-2">Model F1 Score</div>
+                <div class="text-4xl font-extrabold text-primary" id="kpiF1">0</div>
             </div>
-            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor text-center flex flex-col justify-center cursor-pointer hover:bg-gray-800 transition" onclick="toggleDataQuality()">
-                <div class="text-sm text-gray-400">Data Quality</div>
-                <div class="text-lg font-bold text-success" id="kpiDQ">✓ View Report</div>
+            <div class="bg-[#EEF3EC] p-6 rounded-3xl border border-[#B0C3AA] flex flex-col justify-center items-center text-center shadow-sm cursor-pointer hover:bg-[#E3EBE0] transition group"
+                onclick="toggleDataQuality()">
+                <div class="text-sm text-tertiary font-semibold uppercase tracking-wider mb-2">Data Quality</div>
+                <div class="text-lg font-bold text-tertiary flex items-center justify-center gap-2 group-hover:scale-105 transition-transform"
+                    id="kpiDQ">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    View Report
+                </div>
             </div>
         </div>
 
         <!-- Data Quality Report (Collapsible) -->
-        <div id="dqReport" class="hidden bg-cardbg p-6 rounded-lg border border-bordercolor">
-            <h3 class="text-xl font-bold mb-4 border-b border-bordercolor pb-2">🧹 Data Cleaning Summary</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm" id="dqGrid"></div>
+        <div id="dqReport" class="hidden bg-[#FFFBF5] p-8 md:p-10 rounded-3xl border border-primarylight shadow-inner">
+            <h3 class="text-2xl font-bold mb-6 border-b border-bordercol pb-4 text-primary flex items-center gap-3">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                    </path>
+                </svg>
+                Data Cleaning Summary
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-base" id="dqGrid"></div>
         </div>
 
         <!-- Charts Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
-                <canvas id="chartFraudVsLegit" height="250"></canvas>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm flex flex-col justify-center">
+                <canvas id="chartFraudVsLegit" height="280"></canvas>
             </div>
-            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
-                <canvas id="chartCategory" height="250"></canvas>
-            </div>
-            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
-                <canvas id="chartDevice" height="250"></canvas>
-            </div>
-            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
-                <canvas id="chartPayment" height="250"></canvas>
-            </div>
-        </div>
-        
-        <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
-            <canvas id="chartHour" height="300"></canvas>
-        </div>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
-                <canvas id="chartLocation" height="300"></canvas>
-            </div>
-            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
-                <canvas id="chartAmount" height="300"></canvas>
-            </div>
+            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm"><canvas id="chartCategory"
+                    height="280"></canvas></div>
+            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm"><canvas id="chartDevice"
+                    height="280"></canvas></div>
+            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm"><canvas id="chartPayment"
+                    height="280"></canvas></div>
         </div>
 
-        <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
-            <canvas id="chartDaily" height="300"></canvas>
+        <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm">
+            <canvas id="chartHour" height="350"></canvas>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm"><canvas id="chartLocation"
+                    height="320"></canvas></div>
+            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm"><canvas id="chartAmount"
+                    height="320"></canvas></div>
+        </div>
+
+        <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm">
+            <canvas id="chartDaily" height="350"></canvas>
         </div>
 
         <!-- Fraud Table -->
-        <div class="bg-cardbg rounded-lg border border-bordercolor overflow-hidden">
-            <div class="p-4 border-b border-bordercolor flex justify-between items-center bg-[#1e242d]">
-                <h3 class="text-xl font-bold">🚨 Top Fraud Transactions</h3>
-                <input type="text" id="tableSearch" placeholder="Search..." class="bg-darkbg border border-bordercolor rounded px-3 py-1 text-sm focus:outline-none focus:border-accent w-64" onkeyup="filterTable()">
+        <div class="bg-cardbg rounded-3xl border border-bordercol overflow-hidden shadow-sm">
+            <div
+                class="p-6 md:p-8 border-b border-bordercol flex flex-col md:flex-row justify-between items-center bg-[#FFFBF5]">
+                <h3 class="text-2xl font-bold text-textmain flex items-center gap-3">
+                    <svg class="w-8 h-8 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                        </path>
+                    </svg>
+                    Top Fraud Transactions
+                </h3>
+                <div class="relative w-full md:w-80 mt-4 md:mt-0">
+                    <svg class="w-5 h-5 absolute left-3 top-3 text-textsub" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input type="text" id="tableSearch" placeholder="Search suspicious transactions..."
+                        class="bg-white border-2 border-bordercol rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-primary w-full transition shadow-inner font-medium text-textmain"
+                        onkeyup="filterTable()">
+                </div>
             </div>
-            <div class="overflow-y-auto max-h-[500px]">
-                <table class="w-full text-left border-collapse" id="fraudTable">
-                    <thead class="bg-darkbg text-gray-400 sticky top-0 shadow">
+            <div class="overflow-x-auto overflow-y-auto max-h-[600px]">
+                <table class="w-full text-left border-collapse whitespace-nowrap" id="fraudTable">
+                    <thead class="bg-[#F8F5F1] text-textsub sticky top-0 shadow-sm z-10">
                         <tr>
-                            <th class="p-3 font-semibold border-b border-bordercolor">TXN ID</th>
-                            <th class="p-3 font-semibold border-b border-bordercolor">User</th>
-                            <th class="p-3 font-semibold border-b border-bordercolor">Amount</th>
-                            <th class="p-3 font-semibold border-b border-bordercolor">Location</th>
-                            <th class="p-3 font-semibold border-b border-bordercolor">Category</th>
-                            <th class="p-3 font-semibold border-b border-bordercolor">Score</th>
-                            <th class="p-3 font-semibold border-b border-bordercolor">Flags</th>
+                            <th class="p-5 font-bold text-xs uppercase tracking-widest border-b border-bordercol">TXN ID
+                            </th>
+                            <th class="p-5 font-bold text-xs uppercase tracking-widest border-b border-bordercol">User
+                            </th>
+                            <th
+                                class="p-5 font-bold text-xs uppercase tracking-widest border-b border-bordercol text-right">
+                                Amount</th>
+                            <th class="p-5 font-bold text-xs uppercase tracking-widest border-b border-bordercol">
+                                Location</th>
+                            <th class="p-5 font-bold text-xs uppercase tracking-widest border-b border-bordercol">
+                                Category</th>
+                            <th
+                                class="p-5 font-bold text-xs uppercase tracking-widest border-b border-bordercol text-center">
+                                Risk</th>
+                            <th
+                                class="p-5 font-bold text-xs uppercase tracking-widest border-b border-bordercol min-w-[250px]">
+                                Flags Mapped</th>
                         </tr>
                     </thead>
-                    <tbody id="tableBody" class="text-sm divide-y divide-bordercolor"></tbody>
+                    <tbody id="tableBody" class="text-sm divide-y divide-bordercol"></tbody>
                 </table>
             </div>
         </div>
@@ -165,14 +360,14 @@
         const API_URL = 'http://localhost:5050/api/analyze';
         let chartInstances = {};
         let rawFraudTable = [];
-        let curData = null; // Cache
+        let curData = null;
 
-        // Loading states
         const loadingTexts = [
-            "Cleaning data…", 
-            "Engineering features…", 
-            "Running model…", 
-            "Building charts…"
+            "Parsing datasets...",
+            "Running cleaner algorithms...",
+            "Engineering features...",
+            "Generating Random Forest scores...",
+            "Compiling visualization..."
         ];
         let textInterval;
 
@@ -180,7 +375,7 @@
             document.getElementById('loadingOverlay').classList.remove('hidden');
             document.getElementById('loadingOverlay').classList.add('flex');
             document.getElementById('errorBox').classList.add('hidden');
-            
+
             let i = 0;
             document.getElementById('loadingText').innerText = loadingTexts[0];
             textInterval = setInterval(() => {
@@ -200,28 +395,41 @@
             el.classList.toggle('hidden');
         }
 
+        function resetDashboard() {
+            document.getElementById('fileInput').value = "";
+            document.getElementById('dashboardContent').classList.add('hidden');
+            document.getElementById('dashboardContent').classList.remove('flex');
+            document.getElementById('landingView').classList.remove('hidden');
+            document.getElementById('landingView').classList.add('flex');
+            window.scrollTo(0, 0);
+            Object.values(chartInstances).forEach(chart => chart.destroy());
+            chartInstances = {};
+        }
+
         async function analyzeData() {
-            showLoading();
             const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) return;
+
+            showLoading();
             const formData = new FormData();
-            
-            if (fileInput.files.length > 0) {
-                formData.append('file', fileInput.files[0]);
-            }
+            formData.append('file', fileInput.files[0]);
 
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const data = await response.json();
-                
-                if (!response.ok) throw new Error(data.error || 'Server error');
-                
+
+                if (!response.ok) throw new Error(data.error || 'Server processing error');
+
                 curData = data;
+                document.getElementById('landingView').classList.add('hidden');
+                document.getElementById('landingView').classList.remove('flex');
+
                 renderDashboard(data);
-                
+
                 document.getElementById('dashboardContent').classList.remove('hidden');
                 document.getElementById('dashboardContent').classList.add('flex');
             } catch (err) {
@@ -233,172 +441,179 @@
         }
 
         function renderDashboard(data) {
-            // KPIs
             document.getElementById('kpiTotal').innerText = data.summary.total_transactions.toLocaleString();
             document.getElementById('kpiFraud').innerText = data.summary.fraud_detected.toLocaleString();
             document.getElementById('kpiRate').innerText = data.summary.fraud_rate + '%';
             document.getElementById('kpiF1').innerText = data.summary.model_f1;
-            
-            // DQ Report
+
             const dq = data.data_quality_report;
             const fixes = data.summary;
-            
-            // Ensure values exist safely
+
             const origRows = dq.original_rows || 0;
             const dupesRemoved = fixes.duplicates_removed || 0;
             const missingCells = fixes.missing_cells_fixed || 0;
             const invalidIps = fixes.invalid_ips_found || 0;
             const catsFixed = dq.corrupted_categories || 0;
             const locAliases = dq.location_aliases_normalized || 0;
-            
-            const renderDQItem = (label, val, isProblem) => {
-                let color = val === 0 ? 'text-success' : (isProblem ? 'text-danger' : 'text-accent');
-                if(!isProblem && val !== 0) color = 'text-accent'; 
-                return `<div><span class="text-gray-400">${label}:</span> <span class="font-mono ${color}">${val}</span></div>`;
+
+            const renderDQItem = (label, val, highlightError) => {
+                let color = val === 0 ? 'text-tertiary' : (highlightError ? 'text-danger' : 'text-primary');
+                let weight = val > 0 ? 'font-bold' : 'font-medium';
+                return `<div class="bg-white p-4 rounded-xl shadow-sm border border-bordercol"><span class="block text-textsub text-xs uppercase tracking-wider mb-2 font-semibold">${label}</span> <span class="font-mono text-xl ${weight} ${color}">${val}</span></div>`;
             };
 
             const dqHtml = `
-                ${renderDQItem("Original Rows", origRows, false)}
-                ${renderDQItem("Duplicates Removed", dupesRemoved, true)}
-                ${renderDQItem("Missing Cells Fixed", missingCells, true)}
+                ${renderDQItem("Original Rows Scanned", origRows, false)}
+                ${renderDQItem("Duplicates Eliminated", dupesRemoved, true)}
+                ${renderDQItem("Missing Cells Resolved", missingCells, true)}
                 ${renderDQItem("Invalid IPs Detected", invalidIps, true)}
-                ${renderDQItem("Categories Fixed", catsFixed, false)}
+                ${renderDQItem("Corrupt Categories Fixed", catsFixed, false)}
                 ${renderDQItem("Location Aliases Mapped", locAliases, false)}
                 ${renderDQItem("Format Unified (Dates)", dq.mixed_timestamp_formats || 0, false)}
             `;
             document.getElementById('dqGrid').innerHTML = dqHtml;
 
-            // Render Charts
+            const colorMain = '#875A19';
+            const colorSecondary = '#6C6256';
+            const colorTertiary = '#4B6344';
+            const colorDanger = '#A63D32';
+            const colorSub = '#DFD8D0';
+
             buildChart('chartFraudVsLegit', 'doughnut', {
-                labels: ['Fraud', 'Legit'],
+                labels: ['Fraudulent', 'Legitimate'],
                 datasets: [{
                     data: [(data.charts.fraud_vs_legit.fraud || 0), (data.charts.fraud_vs_legit.legit || 0)],
-                    backgroundColor: ['#f85149', '#3fb950'],
+                    backgroundColor: [colorDanger, colorTertiary],
                     borderWidth: 0,
-                    hoverOffset: 4
+                    hoverOffset: 6
                 }]
-            }, { plugins: { title: { display: true, text: 'Fraud vs Legit Breakdown' } } });
+            }, { plugins: { title: { display: true, text: 'Fraud vs Legit Breakdown' } }, cutout: '70%' });
 
             buildChart('chartCategory', 'bar', {
                 labels: data.charts.fraud_by_category.labels,
-                datasets: [{ label: 'Fraud Count', data: data.charts.fraud_by_category.values, backgroundColor: '#58a6ff' }]
-            }, { indexAxis: 'y', plugins: { title: { display: true, text: 'Fraud by Category' } } });
+                datasets: [{ label: 'Fraud Count', data: data.charts.fraud_by_category.values, backgroundColor: colorMain, borderRadius: 6 }]
+            }, { indexAxis: 'y', plugins: { legend: { display: false }, title: { display: true, text: 'Fraud by Category' } } });
 
             buildChart('chartDevice', 'bar', {
                 labels: data.charts.fraud_by_device.labels,
-                datasets: [{ label: 'Fraud Count', data: data.charts.fraud_by_device.values, backgroundColor: '#d2a8ff' }]
-            }, { plugins: { title: { display: true, text: 'Fraud by Device Type' } } });
+                datasets: [{ label: 'Fraud Count', data: data.charts.fraud_by_device.values, backgroundColor: colorSecondary, borderRadius: 6, maxBarThickness: 50 }]
+            }, { plugins: { legend: { display: false }, title: { display: true, text: 'Fraud by Device Subtype' } } });
 
             buildChart('chartPayment', 'pie', {
                 labels: data.charts.fraud_by_payment_method.labels,
-                datasets: [{ data: data.charts.fraud_by_payment_method.values, backgroundColor: ['#58a6ff', '#f85149', '#3fb950', '#ffa657', '#d2a8ff'], borderWidth: 0 }]
+                datasets: [{ data: data.charts.fraud_by_payment_method.values, backgroundColor: [colorMain, colorSecondary, colorTertiary, '#D49F4B', colorDanger], borderWidth: 0 }]
             }, { plugins: { title: { display: true, text: 'Fraud by Payment Method' } } });
 
-            // Line chart area fill 
             buildChart('chartHour', 'line', {
                 labels: data.charts.fraud_by_hour.labels,
-                datasets: [{ 
-                    label: 'Fraud Count', 
-                    data: data.charts.fraud_by_hour.values, 
-                    borderColor: '#f85149',
-                    backgroundColor: 'rgba(248, 81, 73, 0.2)',
+                datasets: [{
+                    label: 'Fraud Occurrences',
+                    data: data.charts.fraud_by_hour.values,
+                    borderColor: colorDanger,
+                    backgroundColor: 'rgba(166, 61, 50, 0.1)',
                     fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+                    pointBackgroundColor: colorDanger,
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    borderWidth: 3
                 }]
-            }, { plugins: { title: { display: true, text: 'Fraud Distribution Across 24h Day' } }, scales: { y: { beginAtZero: true } } });
+            }, { plugins: { legend: { display: false }, title: { display: true, text: 'Fraud Events Distributed Over 24h Day' } } });
 
             buildChart('chartDaily', 'line', {
                 labels: data.charts.daily_fraud_trend.dates,
-                datasets: [{ 
-                    label: 'Fraud Events', 
-                    data: data.charts.daily_fraud_trend.counts, 
-                    borderColor: '#58a6ff',
-                    backgroundColor: 'rgba(88, 166, 255, 0.1)',
+                datasets: [{
+                    label: 'Fraud Volume',
+                    data: data.charts.daily_fraud_trend.counts,
+                    borderColor: colorMain,
+                    backgroundColor: 'rgba(135, 90, 25, 0.08)',
                     fill: true,
-                    tension: 0.3
+                    tension: 0.3,
+                    pointBackgroundColor: colorMain,
+                    borderWidth: 3
                 }]
-            }, { plugins: { title: { display: true, text: 'Daily Fraud Trend (Over time)' } }, scales: { y: { beginAtZero: true } } });
+            }, { plugins: { legend: { display: false }, title: { display: true, text: 'Trailing Daily Fraud Trends' } } });
 
             buildChart('chartLocation', 'bar', {
                 labels: data.charts.fraud_by_location.labels,
-                datasets: [{ label: 'Fraud Count', data: data.charts.fraud_by_location.values, backgroundColor: '#ffa657' }]
-            }, { indexAxis: 'y', plugins: { title: { display: true, text: 'Top 10 Locations' } } });
+                datasets: [{ label: 'Fraud Count', data: data.charts.fraud_by_location.values, backgroundColor: '#D49F4B', borderRadius: 6 }]
+            }, { indexAxis: 'y', plugins: { legend: { display: false }, title: { display: true, text: 'Top 10 High-Risk Regions' } } });
 
             buildChart('chartAmount', 'bar', {
                 labels: data.charts.amount_distribution.bins,
                 datasets: [
-                    { label: 'Fraud', data: data.charts.amount_distribution.fraud_counts, backgroundColor: '#f85149' },
-                    { label: 'Legit', data: data.charts.amount_distribution.legit_counts, backgroundColor: '#3fb950' }
+                    { label: 'Fraudulent Activity', data: data.charts.amount_distribution.fraud_counts, backgroundColor: colorDanger, borderRadius: 3 },
+                    { label: 'Legitimate Baseline', data: data.charts.amount_distribution.legit_counts, backgroundColor: colorTertiary, borderRadius: 3 }
                 ]
-            }, { plugins: { title: { display: true, text: 'Amount Distribution (Fraud vs Legit)' } }, scales: { x: { stacked: false }, y: { stacked: false, type: 'logarithmic' } } });
+            }, { plugins: { title: { display: true, text: 'Amount Value Distributions' } }, scales: { y: { type: 'logarithmic' } } });
 
-            // Table
             rawFraudTable = data.fraud_table || [];
             renderTable(rawFraudTable);
         }
 
-        function buildChart(canvasId, type, data, options={}) {
+        function buildChart(canvasId, type, data, options = {}) {
             if (chartInstances[canvasId]) {
                 chartInstances[canvasId].destroy();
             }
             const ctx = document.getElementById(canvasId).getContext('2d');
-            
+
             const defOptions = {
                 responsive: true,
                 maintainAspectRatio: false,
-                color: '#c9d1d9',
+                color: '#615A53',
+                font: { family: "'Outfit', sans-serif" },
                 ...options
             };
-            
-            // Adjust grid lines coloring
-            if (!defOptions.scales) { defOptions.scales = {}; }
-            if (defOptions.scales.x || defOptions.scales.y) {
-                if(defOptions.scales.x) {
-                    defOptions.scales.x.grid = { color: '#30363d' };
-                    defOptions.scales.x.ticks = { color: '#8b949e' };
-                }
-                if(defOptions.scales.y) {
-                    defOptions.scales.y.grid = { color: '#30363d' };
-                    defOptions.scales.y.ticks = { color: '#8b949e' };
-                }
-            } else if (type === 'bar' || type === 'line') {
+
+            if (!defOptions.plugins) defOptions.plugins = {};
+            if (defOptions.plugins.title) {
+                defOptions.plugins.title.font = { size: 16, weight: 'bold', family: "'Outfit', sans-serif" };
+                defOptions.plugins.title.color = '#2C2621';
+                defOptions.plugins.title.padding = { bottom: 20 };
+            }
+
+            if (!defOptions.scales && (type === 'bar' || type === 'line')) {
                 defOptions.scales = {
-                    x: { grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
-                    y: { grid: { color: '#30363d' }, ticks: { color: '#8b949e' }, beginAtZero: true }
+                    x: { grid: { color: '#EBE8E5', drawBorder: false }, ticks: { color: '#615A53' } },
+                    y: { grid: { color: '#EBE8E5', drawBorder: false }, ticks: { color: '#615A53' }, beginAtZero: true }
+                }
+            } else if (defOptions.scales) {
+                if (defOptions.scales.x) {
+                    defOptions.scales.x.grid = { color: '#EBE8E5', drawBorder: false, ...defOptions.scales.x.grid };
+                    defOptions.scales.x.ticks = { color: '#615A53', ...defOptions.scales.x.ticks };
+                }
+                if (defOptions.scales.y) {
+                    defOptions.scales.y.grid = { color: '#EBE8E5', drawBorder: false, ...defOptions.scales.y.grid };
+                    defOptions.scales.y.ticks = { color: '#615A53', ...defOptions.scales.y.ticks };
                 }
             }
 
-            chartInstances[canvasId] = new Chart(ctx, {
-                type: type,
-                data: data,
-                options: defOptions
-            });
+            chartInstances[canvasId] = new Chart(ctx, { type: type, data: data, options: defOptions });
         }
 
         function renderTable(rows) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
-            
-            if(rows.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-gray-500">No matching transactions</td></tr>';
+
+            if (rows.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-textsub bg-white font-medium">No matching transactions mapped.</td></tr>';
                 return;
             }
 
             rows.forEach(r => {
-                let badgeClass = r.fraud_score > 0.85 ? 'bg-danger' : (r.fraud_score > 0.7 ? 'bg-orange-500' : 'bg-yellow-600');
-                
-                let flagsHtml = (r.fraud_reasons || []).map(f => `<span class="bg-[#21262d] border border-bordercolor px-2 py-1 rounded-full text-xs mr-1 text-gray-300 inline-block mb-1">${f}</span>`).join('');
-                
+                let badgeClass = r.fraud_score > 0.85 ? 'bg-danger text-white' : (r.fraud_score > 0.70 ? 'bg-[#D49F4B] text-white' : 'bg-[#E3DFD9] text-textmain');
+                let flagsHtml = (r.fraud_reasons || []).map(f => `<span class="bg-[#F8F5F1] border border-[#DFD8D0] px-3 py-1 rounded inline-block mb-1 text-xs font-semibold text-textsub mr-1">${f}</span>`).join('');
+
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-[#1e242d] transition';
+                tr.className = 'hover:bg-[#FFFBF5] transition bg-white';
                 tr.innerHTML = `
-                    <td class="p-4 font-mono text-xs text-accent"><span title="${r.transaction_id}">${(r.transaction_id || '').substring(0,8)}...</span></td>
-                    <td class="p-4 font-mono text-xs text-gray-400"><span title="${r.user_id}">${(r.user_id || '').substring(0,8)}...</span></td>
-                    <td class="p-4 font-semibold">₹${Number(r.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                    <td class="p-4">${r.location}</td>
-                    <td class="p-4">${r.category}</td>
-                    <td class="p-4"><span class="px-2 py-1 rounded text-white text-xs font-bold ${badgeClass}">${(r.fraud_score*100).toFixed(0)}%</span></td>
-                    <td class="p-4 max-w-[200px]">${flagsHtml}</td>
+                    <td class="p-5 font-mono text-sm text-primary font-bold"><span title="${r.transaction_id}">${(r.transaction_id || '').substring(0, 8)}...</span></td>
+                    <td class="p-5 font-mono text-sm text-textsub">${(r.user_id || '').substring(0, 8)}</td>
+                    <td class="p-5 font-bold text-textmain text-right">₹${Number(r.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                    <td class="p-5 text-textmain font-medium">${r.location}</td>
+                    <td class="p-5 text-textsub">${r.category}</td>
+                    <td class="p-5 text-center"><span class="px-3 py-1.5 rounded-lg shadow-sm text-sm font-extrabold tracking-wide ${badgeClass}">${(r.fraud_score * 100).toFixed(0)}%</span></td>
+                    <td class="p-5 whitespace-normal">${flagsHtml}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -406,13 +621,10 @@
 
         function filterTable() {
             const term = document.getElementById('tableSearch').value.toLowerCase();
-            const filtered = rawFraudTable.filter(r => {
-                return Object.values(r).some(v => String(v).toLowerCase().includes(term));
-            });
+            const filtered = rawFraudTable.filter(r => Object.values(r).some(v => String(v).toLowerCase().includes(term)));
             renderTable(filtered);
         }
-
-        // Awaiting user action (upload or click 'Analyze Sample')
     </script>
 </body>
+
 </html>

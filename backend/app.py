@@ -14,14 +14,11 @@ CORS(app)
 @app.route('/api/analyze', methods=['POST'])
 def analyze():
     try:
-        if 'file' in request.files and request.files['file'].filename != '':
-            file = request.files['file']
-            df = pd.read_csv(file)
-        else:
-            sample_path = os.path.join(os.path.dirname(__file__), 'sample.csv')
-            if not os.path.exists(sample_path):
-                return jsonify({"error": "No file uploaded and sample.csv not found."}), 400
-            df = pd.read_csv(sample_path)
+        if 'file' not in request.files or request.files['file'].filename == '':
+            return jsonify({"error": "Upload blocked: No CSV file was provided. Please upload a structured dataset to proceed."}), 400
+            
+        file = request.files['file']
+        df = pd.read_csv(file)
             
         df, report = clean_data(df)
         df = engineer_features(df)
