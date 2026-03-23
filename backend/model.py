@@ -59,10 +59,15 @@ def train_and_predict(df):
 
     df['fraud_reasons'] = df.apply(get_reasons, axis=1)
     
+    feature_importances = model.feature_importances_
+    importance_dict = {f: float(imp) for f, imp in zip(features, feature_importances)}
+    importance_dict = dict(sorted(importance_dict.items(), key=lambda item: item[1], reverse=True))
+    
     metrics = {
         "model_f1": float(round(f1, 2)),
         "precision": float(round(precision, 2)),
-        "recall": float(round(recall, 2))
+        "recall": float(round(recall, 2)),
+        "feature_importance": importance_dict
     }
     
     return df, metrics

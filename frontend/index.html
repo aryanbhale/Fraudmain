@@ -84,17 +84,28 @@
     <nav class="w-full max-w-7xl flex flex-row justify-between items-center py-2 mb-10 md:mb-16 px-4 md:px-0">
         <div class="flex items-center gap-3 cursor-pointer" onclick="location.reload()">
             <div class="w-10 h-10 rounded-xl bg-primarylight text-primary flex items-center justify-center">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                    </path>
+                </svg>
             </div>
-            <span class="text-2xl font-extrabold text-primary tracking-tight">FraudGuard</span>
+            <span class="text-2xl font-extrabold text-primary tracking-tight">Fraud Shield</span>
         </div>
         <div class="hidden md:flex gap-10 items-center">
-            <a href="#" onclick="location.reload()" class="text-primary font-bold hover:text-primary transition border-b-2 border-primary pb-1">Home</a>
-            <a href="#" class="text-textsub font-semibold hover:text-primary transition border-b-2 border-transparent hover:border-primary pb-1">About Project</a>
-            <a href="#" class="text-textsub font-semibold hover:text-primary transition border-b-2 border-transparent hover:border-primary pb-1">Contact</a>
+            <a href="#" onclick="location.reload()"
+                class="text-primary font-bold hover:text-primary transition border-b-2 border-primary pb-1">Home</a>
+            <a href="#"
+                class="text-textsub font-semibold hover:text-primary transition border-b-2 border-transparent hover:border-primary pb-1">About
+                Project</a>
+            <a href="#"
+                class="text-textsub font-semibold hover:text-primary transition border-b-2 border-transparent hover:border-primary pb-1">Contact</a>
         </div>
         <button class="md:hidden text-primary focus:outline-none">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                </path>
+            </svg>
         </button>
     </nav>
 
@@ -102,7 +113,7 @@
     <div id="landingView" class="w-full max-w-6xl mt-10 md:mt-20 flex flex-col items-center animate-fade-in">
         <div class="text-center mb-16">
             <h6 class="text-2xl md:text-3xl lg:text-4xl font-extrabold text-primary mb-6 tracking-tight">Yadavrao
-                Tasgaonkar College Of Engineering</h6>
+                Tasgaonkar College Of Engineering & Technology</h6>
             <h3 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-primary mb-6 tracking-tight">Fraud Detection
                 System</h3>
             <p class="text-lg md:text-xl text-textsub max-w-3xl mx-auto leading-relaxed">Secure your financial
@@ -279,29 +290,42 @@
         <!-- Charts Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm flex flex-col justify-center">
-                <canvas id="chartFraudVsLegit" height="280"></canvas>
+                <div class="relative w-full h-[280px]"><canvas id="chartFraudVsLegit"></canvas></div>
             </div>
-            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm"><canvas id="chartCategory"
-                    height="280"></canvas></div>
-            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm"><canvas id="chartDevice"
-                    height="280"></canvas></div>
-            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm"><canvas id="chartPayment"
-                    height="280"></canvas></div>
+            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm">
+                <div class="relative w-full h-[280px]"><canvas id="chartCategory"></canvas></div>
+            </div>
+            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm">
+                <div class="relative w-full h-[280px]"><canvas id="chartDevice"></canvas></div>
+            </div>
+            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm">
+                <div class="relative w-full h-[280px]"><canvas id="chartPayment"></canvas></div>
+            </div>
+        </div>
+
+        <div class="bg-[#FFFBF5] p-8 md:p-10 rounded-3xl border-2 border-primarylight shadow-sm my-8">
+            <h3 class="text-xl font-bold mb-6 text-primary flex items-center gap-3">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                AI Explainability (SHAP Proxies / Feature Weights)
+            </h3>
+            <div class="relative w-full h-[350px]"><canvas id="chartFeatureImportance"></canvas></div>
         </div>
 
         <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm">
-            <canvas id="chartHour" height="350"></canvas>
+            <div class="relative w-full h-[350px]"><canvas id="chartHour"></canvas></div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm"><canvas id="chartLocation"
-                    height="320"></canvas></div>
-            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm"><canvas id="chartAmount"
-                    height="320"></canvas></div>
+            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm">
+                <div class="relative w-full h-[320px]"><canvas id="chartLocation"></canvas></div>
+            </div>
+            <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm">
+                <div class="relative w-full h-[320px]"><canvas id="chartAmount"></canvas></div>
+            </div>
         </div>
 
         <div class="bg-cardbg p-8 rounded-3xl border border-bordercol shadow-sm">
-            <canvas id="chartDaily" height="350"></canvas>
+            <div class="relative w-full h-[350px]"><canvas id="chartDaily"></canvas></div>
         </div>
 
         <!-- Fraud Table -->
@@ -503,6 +527,18 @@
                 labels: data.charts.fraud_by_payment_method.labels,
                 datasets: [{ data: data.charts.fraud_by_payment_method.values, backgroundColor: [colorMain, colorSecondary, colorTertiary, '#D49F4B', colorDanger], borderWidth: 0 }]
             }, { plugins: { title: { display: true, text: 'Fraud by Payment Method' } } });
+
+            if (data.charts.feature_importance) {
+                buildChart('chartFeatureImportance', 'bar', {
+                    labels: data.charts.feature_importance.labels.map(l => l.replace(/_/g, ' ').toUpperCase()),
+                    datasets: [{ 
+                        label: 'Gini Importance Score', 
+                        data: data.charts.feature_importance.values, 
+                        backgroundColor: '#D49F4B', 
+                        borderRadius: 6 
+                    }]
+                }, { indexAxis: 'y', plugins: { legend: { display: false }, title: { display: false } } });
+            }
 
             buildChart('chartHour', 'line', {
                 labels: data.charts.fraud_by_hour.labels,

@@ -80,7 +80,11 @@ def build_response(df, report, metrics):
         "fraud_vs_legit": fraud_vs_legit,
         "fraud_by_location": fraud_by_location,
         "amount_distribution": amount_distribution,
-        "daily_fraud_trend": daily_fraud_trend
+        "daily_fraud_trend": daily_fraud_trend,
+        "feature_importance": {
+            "labels": list(metrics["feature_importance"].keys()),
+            "values": list(metrics["feature_importance"].values())
+        } if "feature_importance" in metrics else {"labels": [], "values": []}
     }
 
     top_fraud = fraud_df.sort_values(by='fraud_probability', ascending=False).head(50)
