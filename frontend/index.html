@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudGuard Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0d1117',
+                        cardbg: '#161b22',
+                        bordercolor: '#30363d',
+                        accent: '#58a6ff',
+                        danger: '#f85149',
+                        success: '#3fb950'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0d1117; color: #c9d1d9; }
+        .spinner { border-top-color: #58a6ff; animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0d1117; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #58a6ff; }
+    </style>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        Chart.defaults.color = '#c9d1d9';
+        Chart.defaults.font.family = 'Inter';
+    </script>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-center bg-cardbg p-4 rounded-lg border border-bordercolor shadow-sm mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-accent">FraudGuard</h1>
+            <p class="text-sm text-gray-400">SIH Internal Hackathon 2026</p>
+        </div>
+        <div class="mt-4 md:mt-0 flex gap-4 items-center">
+            <input type="file" id="fileInput" accept=".csv" class="hidden" onchange="analyzeData()">
+            <button onclick="document.getElementById('fileInput').click()" class="bg-bordercolor hover:bg-gray-700 text-white px-4 py-2 rounded transition font-medium">
+                Upload CSV
+            </button>
+            <button onclick="analyzeData()" class="bg-accent hover:bg-blue-600 text-white px-4 py-2 rounded transition font-medium">
+                Analyze Sample
+            </button>
+        </div>
+    </header>
+
+    <!-- Overlay Spinner -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-darkbg bg-opacity-80 z-50 hidden flex-col justify-center items-center">
+        <div class="w-16 h-16 border-4 border-accent spinner rounded-full mb-4"></div>
+        <h2 id="loadingText" class="text-xl font-semibold text-accent animate-pulse">Analyzing transactions...</h2>
+    </div>
+
+    <!-- Error Message -->
+    <div id="errorBox" class="hidden bg-danger border border-danger bg-opacity-20 text-danger p-4 rounded-lg mb-6">
+        <strong>Error:</strong> <span id="errorMsg"></span>
+    </div>
+
+    <div id="dashboardContent" class="hidden flex-col gap-6">
+        <!-- KPIs -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor text-center hover:border-accent transition">
+                <div class="text-sm text-gray-400">Total Txns</div>
+                <div class="text-2xl font-bold" id="kpiTotal">0</div>
+            </div>
+            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor text-center hover:border-danger transition">
+                <div class="text-sm text-gray-400">Fraud Detected</div>
+                <div class="text-2xl font-bold text-danger" id="kpiFraud">0</div>
+            </div>
+            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor text-center hover:border-danger transition">
+                <div class="text-sm text-gray-400">Fraud Rate</div>
+                <div class="text-2xl font-bold text-danger" id="kpiRate">0%</div>
+            </div>
+            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor text-center hover:border-accent transition">
+                <div class="text-sm text-gray-400">F1 Score</div>
+                <div class="text-2xl font-bold text-accent" id="kpiF1">0</div>
+            </div>
+            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor text-center flex flex-col justify-center cursor-pointer hover:bg-gray-800 transition" onclick="toggleDataQuality()">
+                <div class="text-sm text-gray-400">Data Quality</div>
+                <div class="text-lg font-bold text-success" id="kpiDQ">✓ View Report</div>
+            </div>
+        </div>
+
+        <!-- Data Quality Report (Collapsible) -->
+        <div id="dqReport" class="hidden bg-cardbg p-6 rounded-lg border border-bordercolor">
+            <h3 class="text-xl font-bold mb-4 border-b border-bordercolor pb-2">🧹 Data Cleaning Summary</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm" id="dqGrid"></div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
+                <canvas id="chartFraudVsLegit" height="250"></canvas>
+            </div>
+            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
+                <canvas id="chartCategory" height="250"></canvas>
+            </div>
+            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
+                <canvas id="chartDevice" height="250"></canvas>
+            </div>
+            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
+                <canvas id="chartPayment" height="250"></canvas>
+            </div>
+        </div>
+        
+        <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
+            <canvas id="chartHour" height="300"></canvas>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
+                <canvas id="chartLocation" height="300"></canvas>
+            </div>
+            <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
+                <canvas id="chartAmount" height="300"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-cardbg p-4 rounded-lg border border-bordercolor">
+            <canvas id="chartDaily" height="300"></canvas>
+        </div>
+
+        <!-- Fraud Table -->
+        <div class="bg-cardbg rounded-lg border border-bordercolor overflow-hidden">
+            <div class="p-4 border-b border-bordercolor flex justify-between items-center bg-[#1e242d]">
+                <h3 class="text-xl font-bold">🚨 Top Fraud Transactions</h3>
+                <input type="text" id="tableSearch" placeholder="Search..." class="bg-darkbg border border-bordercolor rounded px-3 py-1 text-sm focus:outline-none focus:border-accent w-64" onkeyup="filterTable()">
+            </div>
+            <div class="overflow-y-auto max-h-[500px]">
+                <table class="w-full text-left border-collapse" id="fraudTable">
+                    <thead class="bg-darkbg text-gray-400 sticky top-0 shadow">
+                        <tr>
+                            <th class="p-3 font-semibold border-b border-bordercolor">TXN ID</th>
+                            <th class="p-3 font-semibold border-b border-bordercolor">User</th>
+                            <th class="p-3 font-semibold border-b border-bordercolor">Amount</th>
+                            <th class="p-3 font-semibold border-b border-bordercolor">Location</th>
+                            <th class="p-3 font-semibold border-b border-bordercolor">Category</th>
+                            <th class="p-3 font-semibold border-b border-bordercolor">Score</th>
+                            <th class="p-3 font-semibold border-b border-bordercolor">Flags</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="text-sm divide-y divide-bordercolor"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5050/api/analyze';
+        let chartInstances = {};
+        let rawFraudTable = [];
+        let curData = null; // Cache
+
+        // Loading states
+        const loadingTexts = [
+            "Cleaning data…", 
+            "Engineering features…", 
+            "Running model…", 
+            "Building charts…"
+        ];
+        let textInterval;
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingOverlay').classList.add('flex');
+            document.getElementById('errorBox').classList.add('hidden');
+            
+            let i = 0;
+            document.getElementById('loadingText').innerText = loadingTexts[0];
+            textInterval = setInterval(() => {
+                i = (i + 1) % loadingTexts.length;
+                document.getElementById('loadingText').innerText = loadingTexts[i];
+            }, 800);
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            document.getElementById('loadingOverlay').classList.remove('flex');
+            clearInterval(textInterval);
+        }
+
+        function toggleDataQuality() {
+            const el = document.getElementById('dqReport');
+            el.classList.toggle('hidden');
+        }
+
+        async function analyzeData() {
+            showLoading();
+            const fileInput = document.getElementById('fileInput');
+            const formData = new FormData();
+            
+            if (fileInput.files.length > 0) {
+                formData.append('file', fileInput.files[0]);
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) throw new Error(data.error || 'Server error');
+                
+                curData = data;
+                renderDashboard(data);
+                
+                document.getElementById('dashboardContent').classList.remove('hidden');
+                document.getElementById('dashboardContent').classList.add('flex');
+            } catch (err) {
+                document.getElementById('errorBox').classList.remove('hidden');
+                document.getElementById('errorMsg').innerText = err.message;
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function renderDashboard(data) {
+            // KPIs
+            document.getElementById('kpiTotal').innerText = data.summary.total_transactions.toLocaleString();
+            document.getElementById('kpiFraud').innerText = data.summary.fraud_detected.toLocaleString();
+            document.getElementById('kpiRate').innerText = data.summary.fraud_rate + '%';
+            document.getElementById('kpiF1').innerText = data.summary.model_f1;
+            
+            // DQ Report
+            const dq = data.data_quality_report;
+            const fixes = data.summary;
+            
+            // Ensure values exist safely
+            const origRows = dq.original_rows || 0;
+            const dupesRemoved = fixes.duplicates_removed || 0;
+            const missingCells = fixes.missing_cells_fixed || 0;
+            const invalidIps = fixes.invalid_ips_found || 0;
+            const catsFixed = dq.corrupted_categories || 0;
+            const locAliases = dq.location_aliases_normalized || 0;
+            
+            const renderDQItem = (label, val, isProblem) => {
+                let color = val === 0 ? 'text-success' : (isProblem ? 'text-danger' : 'text-accent');
+                if(!isProblem && val !== 0) color = 'text-accent'; 
+                return `<div><span class="text-gray-400">${label}:</span> <span class="font-mono ${color}">${val}</span></div>`;
+            };
+
+            const dqHtml = `
+                ${renderDQItem("Original Rows", origRows, false)}
+                ${renderDQItem("Duplicates Removed", dupesRemoved, true)}
+                ${renderDQItem("Missing Cells Fixed", missingCells, true)}
+                ${renderDQItem("Invalid IPs Detected", invalidIps, true)}
+                ${renderDQItem("Categories Fixed", catsFixed, false)}
+                ${renderDQItem("Location Aliases Mapped", locAliases, false)}
+                ${renderDQItem("Format Unified (Dates)", dq.mixed_timestamp_formats || 0, false)}
+            `;
+            document.getElementById('dqGrid').innerHTML = dqHtml;
+
+            // Render Charts
+            buildChart('chartFraudVsLegit', 'doughnut', {
+                labels: ['Fraud', 'Legit'],
+                datasets: [{
+                    data: [(data.charts.fraud_vs_legit.fraud || 0), (data.charts.fraud_vs_legit.legit || 0)],
+                    backgroundColor: ['#f85149', '#3fb950'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            }, { plugins: { title: { display: true, text: 'Fraud vs Legit Breakdown' } } });
+
+            buildChart('chartCategory', 'bar', {
+                labels: data.charts.fraud_by_category.labels,
+                datasets: [{ label: 'Fraud Count', data: data.charts.fraud_by_category.values, backgroundColor: '#58a6ff' }]
+            }, { indexAxis: 'y', plugins: { title: { display: true, text: 'Fraud by Category' } } });
+
+            buildChart('chartDevice', 'bar', {
+                labels: data.charts.fraud_by_device.labels,
+                datasets: [{ label: 'Fraud Count', data: data.charts.fraud_by_device.values, backgroundColor: '#d2a8ff' }]
+            }, { plugins: { title: { display: true, text: 'Fraud by Device Type' } } });
+
+            buildChart('chartPayment', 'pie', {
+                labels: data.charts.fraud_by_payment_method.labels,
+                datasets: [{ data: data.charts.fraud_by_payment_method.values, backgroundColor: ['#58a6ff', '#f85149', '#3fb950', '#ffa657', '#d2a8ff'], borderWidth: 0 }]
+            }, { plugins: { title: { display: true, text: 'Fraud by Payment Method' } } });
+
+            // Line chart area fill 
+            buildChart('chartHour', 'line', {
+                labels: data.charts.fraud_by_hour.labels,
+                datasets: [{ 
+                    label: 'Fraud Count', 
+                    data: data.charts.fraud_by_hour.values, 
+                    borderColor: '#f85149',
+                    backgroundColor: 'rgba(248, 81, 73, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            }, { plugins: { title: { display: true, text: 'Fraud Distribution Across 24h Day' } }, scales: { y: { beginAtZero: true } } });
+
+            buildChart('chartDaily', 'line', {
+                labels: data.charts.daily_fraud_trend.dates,
+                datasets: [{ 
+                    label: 'Fraud Events', 
+                    data: data.charts.daily_fraud_trend.counts, 
+                    borderColor: '#58a6ff',
+                    backgroundColor: 'rgba(88, 166, 255, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            }, { plugins: { title: { display: true, text: 'Daily Fraud Trend (Over time)' } }, scales: { y: { beginAtZero: true } } });
+
+            buildChart('chartLocation', 'bar', {
+                labels: data.charts.fraud_by_location.labels,
+                datasets: [{ label: 'Fraud Count', data: data.charts.fraud_by_location.values, backgroundColor: '#ffa657' }]
+            }, { indexAxis: 'y', plugins: { title: { display: true, text: 'Top 10 Locations' } } });
+
+            buildChart('chartAmount', 'bar', {
+                labels: data.charts.amount_distribution.bins,
+                datasets: [
+                    { label: 'Fraud', data: data.charts.amount_distribution.fraud_counts, backgroundColor: '#f85149' },
+                    { label: 'Legit', data: data.charts.amount_distribution.legit_counts, backgroundColor: '#3fb950' }
+                ]
+            }, { plugins: { title: { display: true, text: 'Amount Distribution (Fraud vs Legit)' } }, scales: { x: { stacked: false }, y: { stacked: false, type: 'logarithmic' } } });
+
+            // Table
+            rawFraudTable = data.fraud_table || [];
+            renderTable(rawFraudTable);
+        }
+
+        function buildChart(canvasId, type, data, options={}) {
+            if (chartInstances[canvasId]) {
+                chartInstances[canvasId].destroy();
+            }
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            
+            const defOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                color: '#c9d1d9',
+                ...options
+            };
+            
+            // Adjust grid lines coloring
+            if (!defOptions.scales) { defOptions.scales = {}; }
+            if (defOptions.scales.x || defOptions.scales.y) {
+                if(defOptions.scales.x) {
+                    defOptions.scales.x.grid = { color: '#30363d' };
+                    defOptions.scales.x.ticks = { color: '#8b949e' };
+                }
+                if(defOptions.scales.y) {
+                    defOptions.scales.y.grid = { color: '#30363d' };
+                    defOptions.scales.y.ticks = { color: '#8b949e' };
+                }
+            } else if (type === 'bar' || type === 'line') {
+                defOptions.scales = {
+                    x: { grid: { color: '#30363d' }, ticks: { color: '#8b949e' } },
+                    y: { grid: { color: '#30363d' }, ticks: { color: '#8b949e' }, beginAtZero: true }
+                }
+            }
+
+            chartInstances[canvasId] = new Chart(ctx, {
+                type: type,
+                data: data,
+                options: defOptions
+            });
+        }
+
+        function renderTable(rows) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            if(rows.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-gray-500">No matching transactions</td></tr>';
+                return;
+            }
+
+            rows.forEach(r => {
+                let badgeClass = r.fraud_score > 0.85 ? 'bg-danger' : (r.fraud_score > 0.7 ? 'bg-orange-500' : 'bg-yellow-600');
+                
+                let flagsHtml = (r.fraud_reasons || []).map(f => `<span class="bg-[#21262d] border border-bordercolor px-2 py-1 rounded-full text-xs mr-1 text-gray-300 inline-block mb-1">${f}</span>`).join('');
+                
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-[#1e242d] transition';
+                tr.innerHTML = `
+                    <td class="p-4 font-mono text-xs text-accent"><span title="${r.transaction_id}">${(r.transaction_id || '').substring(0,8)}...</span></td>
+                    <td class="p-4 font-mono text-xs text-gray-400"><span title="${r.user_id}">${(r.user_id || '').substring(0,8)}...</span></td>
+                    <td class="p-4 font-semibold">₹${Number(r.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                    <td class="p-4">${r.location}</td>
+                    <td class="p-4">${r.category}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded text-white text-xs font-bold ${badgeClass}">${(r.fraud_score*100).toFixed(0)}%</span></td>
+                    <td class="p-4 max-w-[200px]">${flagsHtml}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterTable() {
+            const term = document.getElementById('tableSearch').value.toLowerCase();
+            const filtered = rawFraudTable.filter(r => {
+                return Object.values(r).some(v => String(v).toLowerCase().includes(term));
+            });
+            renderTable(filtered);
+        }
+
+        // Awaiting user action (upload or click 'Analyze Sample')
+    </script>
+</body>
+</html>
