@@ -1,7 +1,7 @@
 # FraudGuard — FinTech Fraud Detection Dashboard
 
 ## Live Demo
-https://github.com/yourusername/fraud-detection-dashboard
+https://aryanbhale.github.io/Fraudmain/frontend/
 
 ## Tech Stack
 Python · Flask · scikit-learn · pandas · Vanilla JS · Chart.js · TailwindCSS
