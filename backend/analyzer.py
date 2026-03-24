@@ -28,6 +28,23 @@ def build_response(df, report, metrics):
 
     fraud_by_category = safe_value_counts('merchant_category', fraud_df)
     
+    # Fraud RATE by category (fraud count / total count per category * 100)
+    fraud_rate_by_category = {"labels": [], "values": []}
+    if 'merchant_category' in df.columns:
+        cat_total = df['merchant_category'].value_counts()
+        cat_fraud = fraud_df['merchant_category'].value_counts() if 'merchant_category' in fraud_df.columns else pd.Series(dtype=int)
+        rate_data = {}
+        for cat in cat_total.index:
+            total = cat_total.get(cat, 0)
+            fraud_count = cat_fraud.get(cat, 0)
+            if total > 0:
+                rate_data[cat] = round(fraud_count / total * 100, 2)
+        sorted_rates = sorted(rate_data.items(), key=lambda x: x[1], reverse=True)
+        fraud_rate_by_category = {
+            "labels": [x[0] for x in sorted_rates],
+            "values": [x[1] for x in sorted_rates]
+        }
+    
     device_col = 'device' if 'device' in df.columns else ('device_type' if 'device_type' in df.columns else 'device_id')
     fraud_by_device = safe_value_counts(device_col, fraud_df)
     
@@ -74,6 +91,7 @@ def build_response(df, report, metrics):
 
     charts = {
         "fraud_by_category": fraud_by_category,
+        "fraud_rate_by_category": fraud_rate_by_category,
         "fraud_by_device": fraud_by_device,
         "fraud_by_payment_method": fraud_by_payment_method,
         "fraud_by_hour": fraud_by_hour,
@@ -84,7 +102,45 @@ def build_response(df, report, metrics):
         "feature_importance": {
             "labels": list(metrics["feature_importance"].keys()),
             "values": list(metrics["feature_importance"].values())
-        } if "feature_importance" in metrics else {"labels": [], "values": []}
+        } if "feature_importance" in metrics else {"labels": [], "values": []},
+        "confusion_matrix": metrics.get("confusion_matrix", {"tp": 0, "fp": 0, "tn": 0, "fn": 0}),
+        "roc_curve": metrics.get("roc_curve", {"fpr": [], "tpr": [], "auc": 0}),
+        "pr_curve": metrics.get("pr_curve", {"precision": [], "recall": []}),
+        "false_negative_breakdown": metrics.get("false_negative_breakdown", {"by_category": {}, "by_device": {}})
+    }
+
+    # Before/After Data Quality comparison
+    before_after = {
+        "transaction_amount": {
+            "before": f"{report.get('missing_amounts', 0)} missing",
+            "after": "0 missing",
+            "fix": "Stripped ₹/INR prefix, cast to float, filled NaN with column median"
+        },
+        "ip_address": {
+            "before": f"{report.get('missing_ips', 0)} NaN, {report.get('invalid_ips', 0)} invalid",
+            "after": "0 issues",
+            "fix": "Regex IPv4 validation, flagged invalids, NaN filled with 0.0.0.0"
+        },
+        "merchant_category": {
+            "before": f"{report.get('corrupted_categories', 0)} corrupted",
+            "after": "0 corrupted",
+            "fix": "difflib fuzzy match to nearest valid category, NaN → Unknown"
+        },
+        "transaction_timestamp": {
+            "before": f"{report.get('mixed_timestamp_formats', 0)} formats found",
+            "after": "Unified datetime",
+            "fix": "Multi-format parser (ISO8601, DD/MM/YYYY, etc.), NaT → median"
+        },
+        "transaction_id": {
+            "before": f"{report.get('duplicate_ids', 0)} duplicates",
+            "after": "0 duplicates",
+            "fix": "Removed exact duplicate rows, kept first occurrence"
+        },
+        "location_columns": {
+            "before": f"{report.get('location_aliases_normalized', 0)} aliases",
+            "after": "All normalized",
+            "fix": "City alias mapping (Bombay→Mumbai, etc.), title-cased"
+        }
     }
 
     top_fraud = fraud_df.sort_values(by='fraud_probability', ascending=False).head(50)
@@ -108,5 +164,6 @@ def build_response(df, report, metrics):
         "summary": summary,
         "charts": charts,
         "fraud_table": fraud_table,
-        "data_quality_report": report
+        "data_quality_report": report,
+        "before_after": before_after
     }

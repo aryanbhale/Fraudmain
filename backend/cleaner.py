@@ -4,6 +4,13 @@ import re
 import difflib
 
 def clean_data(df):
+    # Snapshot missing values per column BEFORE cleaning
+    missing_per_column = {}
+    for col in df.columns:
+        missing_count = int(df[col].isna().sum())
+        if missing_count > 0:
+            missing_per_column[col] = missing_count
+
     report = {
         "original_rows": len(df),
         "duplicate_ids": 0,
@@ -14,7 +21,8 @@ def clean_data(df):
         "mixed_timestamp_formats": 0,
         "mixed_currency_formats": 0,
         "duplicate_amount_column": False,
-        "location_aliases_normalized": 0
+        "location_aliases_normalized": 0,
+        "missing_per_column": missing_per_column
     }
 
     # 1. Duplicate transaction_id
